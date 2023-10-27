@@ -67,6 +67,7 @@ struct _GstMsdkDec
 
   /* input description */
   GstVideoCodecState *input_state;
+  GstVideoCodecState *output_state;
   /* aligned msdk pool info */
   GstBufferPool *pool;
   /* downstream pool info based on allocation query */

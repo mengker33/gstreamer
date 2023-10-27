@@ -764,6 +764,21 @@ _get_va_surface (GstBuffer * buf, GstVideoInfo * info,
   return va_surface;
 }
 
+static void
+gst_msdk_qdata_free (gpointer data)
+{
+  mfxFrameSurface1 *mfx_surface = data;
+
+  if (mfx_surface->Data.Locked == 0) {
+    GstMsdkMemoryID *msdk_mid = (GstMsdkMemoryID *) mfx_surface->Data.MemId;
+
+    g_slice_free (VASurfaceID, msdk_mid->surface);
+    g_slice_free (GstMsdkMemoryID, msdk_mid);
+    g_slice_free (mfxFrameSurface1, mfx_surface);
+  }
+}
+
+
 /* Currently parameter map_flag is not useful on Linux */
 GstMsdkSurface *
 gst_msdk_import_to_msdk_surface (GstBuffer * buf, GstMsdkContext * msdk_context,
@@ -775,6 +790,7 @@ gst_msdk_import_to_msdk_surface (GstBuffer * buf, GstMsdkContext * msdk_context,
   GstMsdkSurface *msdk_surface = NULL;
   mfxFrameSurface1 *mfx_surface = NULL;
   GstMsdkMemoryID *msdk_mid = NULL;
+  GDestroyNotify qdata_destroy = NULL;
 
   mem = gst_buffer_peek_memory (buf, 0);
   msdk_surface = g_slice_new0 (GstMsdkSurface);
@@ -811,9 +827,10 @@ gst_msdk_import_to_msdk_surface (GstBuffer * buf, GstMsdkContext * msdk_context,
   gst_msdk_set_mfx_frame_info_from_video_info (&frame_info, vinfo);
   mfx_surface->Info = frame_info;
 
+  qdata_destroy = gst_msdk_qdata_free;
   /* Set mfxFrameSurface1 as qdata in buffer */
   gst_mini_object_set_qdata (GST_MINI_OBJECT_CAST (mem),
-      GST_MSDK_FRAME_SURFACE, mfx_surface, NULL);
+      GST_MSDK_FRAME_SURFACE, mfx_surface, qdata_destroy);
 
   msdk_surface->surface = mfx_surface;
 

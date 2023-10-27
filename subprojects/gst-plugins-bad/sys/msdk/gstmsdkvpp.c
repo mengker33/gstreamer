@@ -463,6 +463,7 @@ gst_msdk_create_va_pool (GstVideoInfo * info, GstMsdkContext * msdk_context,
       VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC, GST_VA_FEATURE_AUTO,
       allocator, &alloc_params);
 
+  gst_object_unref (display);
   gst_object_unref (allocator);
   gst_caps_unref (aligned_caps);
 

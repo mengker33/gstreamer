@@ -1335,6 +1335,7 @@ gst_msdk_create_va_pool (GstMsdkEnc * thiz, GstCaps * caps, guint num_buffers)
       num_buffers, 0, VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC, GST_VA_FEATURE_AUTO,
       allocator, &alloc_params);
 
+  gst_object_unref (display);
   gst_object_unref (allocator);
 
   GST_LOG_OBJECT (thiz, "Creating va pool");
